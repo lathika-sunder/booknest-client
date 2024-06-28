@@ -1,17 +1,17 @@
-import React from "react";
-import { Routes, Route, Navigate, Outlet} from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 
 const PrivateRoute = ({ children, ...rest }) => {
+  const navigate = useNavigate();
+  const role = localStorage.getItem('role');
 
-  const navigate=useNavigate()
-   const role = localStorage.getItem('role');
+  useEffect(() => {
+    if (role !== "admin") {
+      navigate('/');
+    }
+  }, [role, navigate]);
 
-  if (role === "admin") {
-    return <Outlet />;
-  } else {
-    navigate('/')
-  }
+  return role === "admin" ? <Outlet /> : null;
 };
 
 export default PrivateRoute;
