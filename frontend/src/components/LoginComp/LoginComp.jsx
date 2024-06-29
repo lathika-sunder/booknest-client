@@ -3,6 +3,8 @@ import { Container, Typography, TextField, Button, Grid, Link, Paper } from '@mu
 import './LoginComp.css'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
+import{ToastContainer,toast} from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const LoginComp = () => {
@@ -29,6 +31,9 @@ const LoginComp = () => {
 
             })
             .catch((error) => {
+                const statusCode=error.response.status
+                if(statusCode==404)
+                    toast.error('Login Failed, Invalid Password')
                 console.error('Login Failed:', error.response.data.message);
 
             });
@@ -36,6 +41,7 @@ const LoginComp = () => {
 
     return (
         <div className="login-form">
+        <ToastContainer/>
             <Container component="main" maxWidth="xs" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column" }}>
                 {/* <Paper elevation={3} sx={{ padding: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}> */}
                 <Typography variant="h5" gutterBottom>
