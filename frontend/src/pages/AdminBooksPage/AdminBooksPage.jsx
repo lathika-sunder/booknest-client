@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import Table from "@mui/joy/Table";
 import { Button, Dialog, DialogContent, Pagination } from "@mui/material";
 import { Delete } from "@mui/icons-material";
-import "./UserHomePage.css";
+
 import ViewUserComp from "../../components/ViewUserComp/ViewUserComp";
 import DeleteUserComp from "../../components/DeleteUserComp/DeleteUserComp";
 
 const ITEMS_PER_PAGE = 5;
 
-export default function UserHomePage() {
+export default function AdminBooksPage() {
   const [data, setData] = useState([]);
+  let index=0;
   const [currentPage, setCurrentPage] = useState(1);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -27,10 +28,10 @@ export default function UserHomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let response = await fetch("http://localhost:4040/api/v1/booknest/user/getUsers");
+        let response = await fetch("http://localhost:4040/api/v1/booknest/book/getBooks");
         if (response.ok) {
           let jsonData = await response.json();
-          setData(jsonData.users);
+          setData(jsonData.books);
         } else {
           console.error("Error fetching data:", response.status);
         }
@@ -42,6 +43,7 @@ export default function UserHomePage() {
   }, [data.length]); 
 
   const handleOpenDialog = (userId) => {
+    console.log(userId)
     setSelectedUserId(userId);
     setOpenDialog(true);
   };
@@ -60,9 +62,10 @@ export default function UserHomePage() {
         <thead>
           <tr>
             <th style={{ width: "10%" }}>ID</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Role</th>
+            <th>Book Name</th>
+            <th>Author</th>
+            <th>Pubisher</th>
+            <th>Genre</th>
             <th style={{ width: "20%" }}>Actions</th>
           </tr>
         </thead>
@@ -74,11 +77,13 @@ export default function UserHomePage() {
           }}
         >
           {currentData.map((row) => (
+        
             <tr key={row._id}>
-              <td>{row.userId}</td>
-              <td>{row.name}</td>
-              <td>{row.phone}</td>
-              <td>{row.role}</td>
+              <td>{index+=1}</td>
+              <td>{row.bookName}</td>
+              <td>{row.author}</td>
+              <td>{row.publisher}</td>
+              <td>{row.genre}</td>
               <td>
                 <div className="action-buttons">
                   <Button
@@ -86,7 +91,7 @@ export default function UserHomePage() {
                     onClick={() => handleOpenDialog(row._id)}
                     // style={{ fontSize: 15, height: 20 }}   
                       >
-                    View User
+                    View Book
                   </Button>
                   <Button
                     variant="text"
