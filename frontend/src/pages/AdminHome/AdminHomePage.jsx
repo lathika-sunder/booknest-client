@@ -28,7 +28,7 @@ export default function AdminHomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let response = await fetch("http://localhost:4040/api/v1/booknest/user/getUsers");
+        let response = await fetch("https://booknest-server-blue.vercel.app/api/v1/booknest/user/getUsers");
         if (response.ok) {
           let jsonData = await response.json();
           setData(jsonData.users);

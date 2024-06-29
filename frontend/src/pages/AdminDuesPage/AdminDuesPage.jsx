@@ -28,7 +28,7 @@ export default function AdminDuesPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let response = await fetch("http://localhost:4040/api/v1/booknest/book/getDueBooks");
+        let response = await fetch("https://booknest-server-blue.vercel.app/api/v1/booknest/book/getDueBooks");
         if (response.ok) {
           let jsonData = await response.json();
           setData(jsonData.dueBooks);

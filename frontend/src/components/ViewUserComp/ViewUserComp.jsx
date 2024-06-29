@@ -18,7 +18,7 @@ const ViewUserComp = ({ userId }) => {
 
   const handleSave = async () => {
     try {
-      await axios.put(`http://localhost:4040/api/v1/booknest/user/updateUser/${userId}`, user);
+      await axios.put(`https://booknest-server-blue.vercel.app/api/v1/booknest/user/updateUser/${userId}`, user);
       setIsEditing(false);
     } catch (error) {
       console.log("Error saving user data", error);
@@ -42,7 +42,7 @@ const ViewUserComp = ({ userId }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let response = await axios.get(`http://localhost:4040/api/v1/booknest/user/getUser/${userId}`);
+        let response = await axios.get(`https://booknest-server-blue.vercel.app/api/v1/booknest/user/getUser/${userId}`);
         setUser(response.data.user);
       } catch (error) {
         console.log("Error", error);
@@ -50,7 +50,7 @@ const ViewUserComp = ({ userId }) => {
     };
     const fetchRolesData = async () => {
       try {
-        let response = await axios.get(`http://localhost:4040/api/v1/booknest/user/getUser/${userId}`);
+        let response = await axios.get(`https://booknest-server-blue.vercel.app/api/v1/booknest/user/getUser/${userId}`);
         setRoles(response.data);
       } catch (error) {
         console.log("Error", error);

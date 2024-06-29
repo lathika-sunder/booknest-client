@@ -13,7 +13,7 @@ const LoginComp = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post('http://localhost:4040/api/v1/booknest/user/loginUser', { email, password })
+        axios.post('https://booknest-server-blue.vercel.app/api/v1/booknest/user/loginUser', { email, password })
             .then((response) => {
                 const { token, role } = response.data;
                 localStorage.setItem('token', token)
