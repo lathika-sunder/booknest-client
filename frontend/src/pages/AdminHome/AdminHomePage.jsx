@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Table from "@mui/joy/Table";
 import { Button, Dialog, DialogContent, Pagination } from "@mui/material";
 import { Delete } from "@mui/icons-material";
@@ -6,45 +6,35 @@ import "./AdminHomePage.css";
 import ViewUserComp from "../../components/ViewUserComp/ViewUserComp";
 import DeleteUserComp from "../../components/DeleteUserComp/DeleteUserComp";
 import SearchComp from "../../components/SearchComp/SearchComp";
+import { useQuery } from "react-query";
+import LoadingComp from "../../components/LoadingComp/LoadingComp";
 
 const ITEMS_PER_PAGE = 5;
 
 export default function AdminHomePage() {
-  const [data, setData] = useState([]);
-  let index = 0;
   const [currentPage, setCurrentPage] = useState(1);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentData = data.slice(startIndex, endIndex);
-
-  const onDeleteUser = (deletedUserId) => {
-    setData((prevData) =>
-      prevData.filter((user) => user._id !== deletedUserId)
-    );
-  };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let response = await fetch("https://booknest-server-blue.vercel.app/api/v1/booknest/user/getUsers");
-        if (response.ok) {
-          let jsonData = await response.json();
-          setData(jsonData.users);
-        } else {
-          console.error("Error fetching data:", response.status);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
+  // Fetch data using React Query
+  const { data: users = [], isLoading, isError, refetch } = useQuery(
+    "users",
+    async () => {
+      const response = await fetch(
+        "https://booknest-server-blue.vercel.app/api/v1/booknest/user/getUsers"
+      );
+      if (!response.ok) {
+        throw new Error("Error fetching data");
       }
-    };
-    fetchData();
-  }, [data.length]);
+      const jsonData = await response.json();
+      return jsonData.users;
+    }
+  );
+  if(isLoading)
+    <LoadingComp/>
 
   const handleOpenDialog = (userId) => {
-    console.log(userId)
     setSelectedUserId(userId);
     setOpenDialog(true);
   };
@@ -58,19 +48,26 @@ export default function AdminHomePage() {
   };
 
   const handleSearch = (query) => {
-  
-
-  
+    // Handle search functionality
   };
-  var options=[]
-  data.map((user)=>{
-      options.push(user.name)
-  })
+
+  const onDeleteUser = (deletedUserId) => {
+    // Optimistically update the UI
+    setData((prevData) =>
+      prevData.filter((user) => user._id !== deletedUserId)
+    );
+
+    // Perform delete operation on the server or handle as needed
+  };
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentData = users.slice(startIndex, endIndex);
+
   return (
     <div className="admin-home">
-      <SearchComp onSearch={handleSearch} suggestions={options}/>
+      <SearchComp onSearch={handleSearch} suggestions={users.map((user) => user.name)} />
       <div className="user-table">
-
         <Table hoverRow>
           <thead>
             <tr>
@@ -81,17 +78,10 @@ export default function AdminHomePage() {
               <th style={{ width: "20%" }}>Actions</th>
             </tr>
           </thead>
-          <tbody
-            style={{
-              // fontSize: "x-small",
-              backgroundColor: "white",
-              cursor: "pointer",
-            }}
-          >
-            {currentData.map((row) => (
-
+          <tbody>
+            {currentData.map((row, index) => (
               <tr key={row._id}>
-                <td>{index += 1}</td>
+                <td>{index + 1}</td>
                 <td>{row.name}</td>
                 <td>{row.phone}</td>
                 <td>{row.email}</td>
@@ -100,7 +90,6 @@ export default function AdminHomePage() {
                     <Button
                       variant="contained"
                       onClick={() => handleOpenDialog(row._id)}
-                    // style={{ fontSize: 15, height: 20 }}   
                     >
                       View User
                     </Button>
@@ -125,11 +114,10 @@ export default function AdminHomePage() {
         </Dialog>
         <div className="pagination">
           <Pagination
-            count={Math.ceil(data.length / ITEMS_PER_PAGE)}
+            count={Math.ceil(users.length / ITEMS_PER_PAGE)}
             page={currentPage}
             onChange={handlePageChange}
             color="primary"
-          // size="small"
           />
         </div>
         {isDeleteDialogOpen && (

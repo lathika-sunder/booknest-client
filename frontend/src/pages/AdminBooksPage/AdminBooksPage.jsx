@@ -1,61 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Table from "@mui/joy/Table";
 import { Button, Dialog, DialogContent, Pagination } from "@mui/material";
 import { Delete } from "@mui/icons-material";
-
 import ViewUserComp from "../../components/ViewUserComp/ViewUserComp";
 import DeleteUserComp from "../../components/DeleteUserComp/DeleteUserComp";
 import SearchComp from "../../components/SearchComp/SearchComp";
+import { useQuery } from "react-query";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
 
 const ITEMS_PER_PAGE = 5;
 
-export default function AdminBooksPage() {
-  const [data, setData] = useState([]);
+// Fetch books data
+const fetchBooks = async () => {
+  const { data } = await axios.get(
+    "https://booknest-server-blue.vercel.app/api/v1/booknest/book/getBooks"
+  );
+  return data.books;
+};
 
-  let index = 0;
+export default function AdminBooksPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedBookId, setSelectedBookId] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [suggestions, setSuggestions] = useState([])
+  const [searchResults, setSearchResults] = useState([]);
+
+  const { data: books = [], isLoading, isError, refetch } = useQuery(
+    "books",
+    fetchBooks,
+    { staleTime: 300000 } // Cache data for 5 minutes
+  );
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentData = data.slice(startIndex, endIndex);
+  const currentData = searchResults.length > 0 ? searchResults.slice(startIndex, endIndex) : books.slice(startIndex, endIndex);
 
-
-  const onDeleteUser = (deletedUserId) => {
-    setData((prevData) =>
-      prevData.filter((user) => user._id !== deletedUserId)
-    );
-  };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let response = await fetch("https://booknest-server-blue.vercel.app/api/v1/booknest/book/getBooks");
-        if (response.ok) {
-          let jsonData = await response.json();
-          setData(jsonData.books);
-        } else {
-          console.error("Error fetching data:", response.status);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-    var options = [];
-    data.map((user) => {
-      options.push(user.name)
-
-    })
-    setSuggestions(options)
-  }, [data.length]);
-
-  const handleOpenDialog = (userId) => {
-    console.log(userId)
-    setSelectedUserId(userId);
+  const handleOpenDialog = (bookId) => {
+    setSelectedBookId(bookId);
     setOpenDialog(true);
   };
 
@@ -67,27 +49,30 @@ export default function AdminBooksPage() {
     setCurrentPage(newPage);
   };
 
-  const handleSearch = (query) => {
-    console.log(query)
-    axios.get(`http://localhost:4040/api/v1/booknest/book/searchBooks/?query=${query}`)
-    .then((response)=>{
-      setData(response.data)
-      console.log(response.data)
-    })
-    .catch((error)=>{
-      console.log(error)
-    })
+  const handleSearch = async (query) => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:4040/api/v1/booknest/book/searchBooks/?query=${query}`
+    
+      );
+
+      setSearchResults(data);
+      if(data.length==0)
+        toast.error("Book Not Found")
+      
+    } catch (error) {
+      console.error("Error searching books:", error);
+    }
   };
 
-  var options=[]
-  data.map((book)=>{
-      options.push(book.bookName)
-  })
-
+  const onDeleteBook = (deletedBookId) => {
+    // Implement deletion logic if needed
+  };
 
   return (
     <div className="admin-home">
-      <SearchComp onSearch={handleSearch} suggestions={options} />
+      <ToastContainer/>
+      <SearchComp onSearch={handleSearch} suggestions={books.map((book) => book.bookName)} />
       <div className="user-table">
         <Table hoverRow>
           <thead>
@@ -95,33 +80,22 @@ export default function AdminBooksPage() {
               <th style={{ width: "10%" }}>ID</th>
               <th>Book Name</th>
               <th>Author</th>
-              <th>Pubisher</th>
+              <th>Publisher</th>
               <th>Genre</th>
               <th style={{ width: "20%" }}>Actions</th>
             </tr>
           </thead>
-          <tbody
-            style={{
-              // fontSize: "x-small",
-              backgroundColor: "white",
-              cursor: "pointer",
-            }}
-          >
-            {currentData.map((row) => (
-
+          <tbody style={{ backgroundColor: "white", cursor: "pointer" }}>
+            {currentData.map((row, index) => (
               <tr key={row._id}>
-                <td>{index += 1}</td>
+                <td>{index + 1}</td>
                 <td>{row.bookName}</td>
                 <td>{row.author}</td>
                 <td>{row.publisher}</td>
                 <td>{row.genre}</td>
                 <td>
                   <div className="action-buttons">
-                    <Button
-                      variant="contained"
-                      onClick={() => handleOpenDialog(row._id)}
-                    // style={{ fontSize: 15, height: 20 }}   
-                    >
+                    <Button variant="contained" onClick={() => handleOpenDialog(row._id)}>
                       View Book
                     </Button>
                     <Button
@@ -140,26 +114,23 @@ export default function AdminBooksPage() {
         </Table>
         <Dialog open={openDialog} onClose={handleCloseDialog}>
           <DialogContent>
-            {selectedUserId && <ViewUserComp userId={selectedUserId} />}
+            {selectedBookId && <ViewUserComp userId={selectedBookId} />}
           </DialogContent>
         </Dialog>
         <div className="pagination">
           <Pagination
-            count={Math.ceil(data.length / ITEMS_PER_PAGE)}
+            count={Math.ceil(currentData.length / ITEMS_PER_PAGE)}
             page={currentPage}
             onChange={handlePageChange}
             color="primary"
-          // size="small"
           />
         </div>
         {isDeleteDialogOpen && (
           <DeleteUserComp
-            userId={selectedUserId}
+            userId={selectedBookId}
             open={isDeleteDialogOpen}
-            handleClose={() => {
-              setIsDeleteDialogOpen(false);
-            }}
-            onDeleteUser={onDeleteUser}
+            handleClose={() => setIsDeleteDialogOpen(false)}
+            onDeleteUser={onDeleteBook}
           />
         )}
       </div>

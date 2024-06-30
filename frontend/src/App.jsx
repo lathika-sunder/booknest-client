@@ -8,10 +8,13 @@ import PrivateRoute from './auth/PrivateRoute';
 import NavbarComp from './components/NavbarComp/NavbarComp';
 import AdminBooksPage from './pages/AdminBooksPage/AdminBooksPage';
 import AdminDuesPage from './pages/AdminDuesPage/AdminDuesPage';
+import  {QueryClient, QueryClientProvider, useQuery} from 'react-query'
 
+const queryClient=new QueryClient
 function App() {
   const location = useLocation();
-  const hideNavbarPaths = ['/']; // Add other paths here if needed, like '/signup'
+  const hideNavbarPaths = ['/']; 
+
 
   return (
     <>
@@ -30,9 +33,11 @@ function App() {
 }
 
 const AppWrapper = () => (
-  <BrowserRouter>
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
     <App />
   </BrowserRouter>
+  </QueryClientProvider>
 );
 
 export default AppWrapper;
