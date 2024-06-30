@@ -65,7 +65,7 @@ export default function AdminDuesPage() {
             <th>User Name</th>
             <th>Book Name</th>
             <th>Lended Date</th>
-          
+            <th>Due Amount</th>
             <th style={{ width: "20%" }}>Actions</th>
           </tr>
         </thead>
@@ -82,8 +82,9 @@ export default function AdminDuesPage() {
               <td>{index+=1}</td>
               <td>{row.user}</td>
               <td>{row.book}</td>
-              <td>{row.lendedDate}</td>
-           
+              <td>{<td>{new Date(row.lendedDate).toLocaleDateString()}</td>
+            }</td>
+              <td>{row.dueAmount}</td>
               <td>
                 <div className="action-buttons">
                   <Button
@@ -91,7 +92,7 @@ export default function AdminDuesPage() {
                     onClick={() => handleOpenDialog(row._id)}
                     // style={{ fontSize: 15, height: 20 }}   
                       >
-                    View Book
+                    Close Due
                   </Button>
                   <Button
                     variant="text"

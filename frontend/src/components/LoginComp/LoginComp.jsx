@@ -15,11 +15,12 @@ const LoginComp = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post('https://booknest-server-blue.vercel.app/api/v1/booknest/user/loginUser', { email, password })
+        axios.post('http://localhost:4040/api/v1/booknest/user/loginUser', { email, password })
             .then((response) => {
                 const { token, role } = response.data;
                 localStorage.setItem('token', token)
                 localStorage.setItem('role', role)
+                console.log(response)
                 if (role == "admin") {
                     navigate('/home/admin')
                 }
@@ -28,6 +29,9 @@ const LoginComp = () => {
                 }
                 console.log('Login Successful');
                 console.log(`Role: ${role}`);
+                if(response.cookie){
+                    console.log("Cookie",document.cookie)
+                }
 
             })
             .catch((error) => {
