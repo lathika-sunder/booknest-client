@@ -52,7 +52,7 @@ export default function AdminBooksPage() {
   const handleSearch = async (query) => {
     try {
       const { data } = await axios.get(
-        `http://localhost:4040/api/v1/booknest/book/searchBooks/?query=${query}`
+        `https://booknest-server-blue.vercel.app/api/v1/booknest/book/searchBooks/?query=${query}`
     
       );
 
